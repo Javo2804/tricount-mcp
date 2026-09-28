@@ -50,7 +50,7 @@ up exactly to the total.
 You need **Python 3.10 or newer** and **git**.
 
 ```bash
-git clone https://github.com/<your-user>/tricount-mcp.git
+git clone https://github.com/Javo2804/tricount-mcp.git
 cd tricount-mcp
 python -m venv .venv
 ```

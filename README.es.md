@@ -51,7 +51,7 @@ que las partes siempre suman exactamente el total.
 Necesitas **Python 3.10 o superior** y **git**.
 
 ```bash
-git clone https://github.com/<tu-usuario>/tricount-mcp.git
+git clone https://github.com/Javo2804/tricount-mcp.git
 cd tricount-mcp
 python -m venv .venv
 ```
