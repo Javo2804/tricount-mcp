@@ -1,10 +1,24 @@
 [project]
 name = "tricount-mcp"
 version = "0.1.0"
-description = "MCP server to read and edit Tricount from AI assistants (unofficial)"
+description = "MCP server to read and edit Tricount from any AI assistant (unofficial)"
 readme = "README.md"
 license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Javier Avello" }]
 requires-python = ">=3.10"
+keywords = ["mcp", "model-context-protocol", "tricount", "expense-sharing", "split-bills", "llm", "ai"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial",
+]
 dependencies = [
     "mcp==2.2.0",
     "httpx==0.28.1",
@@ -12,7 +26,10 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/Javo2804/tricount-mcp"
+Homepage = "https://github.com/Javo2804/tricount-mcp"
+Documentation = "https://github.com/Javo2804/tricount-mcp/blob/main/QUICKSTART.md"
+Issues = "https://github.com/Javo2804/tricount-mcp/issues"
+Changelog = "https://github.com/Javo2804/tricount-mcp/blob/main/CHANGELOG.md"
 
 [project.scripts]
 tricount-mcp = "server:main"

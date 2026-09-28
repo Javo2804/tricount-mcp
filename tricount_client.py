@@ -113,7 +113,9 @@ def _money(obj: dict) -> tuple[Decimal, str]:
 
 
 def _parse(key: str, raw: dict) -> Tricount:
-    reg = next(item["Registry"] for item in raw["Response"] if "Registry" in item)
+    reg = next((item["Registry"] for item in raw.get("Response", []) if "Registry" in item), None)
+    if reg is None:  # la API responde 200 con una lista vacía si la key no existe
+        raise ValueError(f"No existe un tricount con la key '{key}'. Revisa que el link esté completo.")
     currency = reg["currency"]
     entries = []
     for item in reg.get("all_registry_entry", []):

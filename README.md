@@ -1,6 +1,8 @@
 # tricount-mcp
 
-**English** · [Español](README.es.md)
+[![CI](https://github.com/Javo2804/tricount-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/Javo2804/tricount-mcp/actions/workflows/ci.yml) [![PyPI](https://img.shields.io/pypi/v/tricount-mcp)](https://pypi.org/project/tricount-mcp/) [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/Javo2804/tricount-mcp/blob/main/LICENSE)
+
+**English** · [Español](https://github.com/Javo2804/tricount-mcp/blob/main/README.es.md)
 
 An [MCP](https://modelcontextprotocol.io) server to read and edit [Tricount](https://tricount.com)
 from any AI assistant that supports MCP: Claude, Cursor, VS Code (GitHub Copilot), Windsurf,
@@ -13,7 +15,7 @@ Ask things like:
 - "Add Pizza, $24, I paid, split among everyone except Carol"
 - "Record that Alice sent me $5"
 
-> **Don't code?** Follow the [quick start guide](QUICKSTART.md): step-by-step setup for your AI
+> **Don't code?** Follow the [quick start guide](https://github.com/Javo2804/tricount-mcp/blob/main/QUICKSTART.md): step-by-step setup for your AI
 > assistant, no programming needed.
 
 > **Unofficial project.** Not affiliated with Tricount or bunq. It uses a private API that was
@@ -81,7 +83,7 @@ format:
 }
 ```
 
-The [quick start guide](QUICKSTART.md#step-2-add-tricount-to-your-assistant) lists where each app
+The [quick start guide](https://github.com/Javo2804/tricount-mcp/blob/main/QUICKSTART.md#step-2-add-tricount-to-your-assistant) lists where each app
 keeps its config, plus the formats for VS Code, Codex CLI and Claude Code.
 
 ### Manual install (to modify the code)
@@ -140,7 +142,7 @@ In the common `mcpServers` format:
 
 On Windows, write paths with double backslashes, for example:
 `"C:\\Users\\your-user\\tricount-mcp\\.venv\\Scripts\\python.exe"`. For other formats (VS Code,
-Codex CLI, Claude Code), see the [quick start guide](QUICKSTART.md#step-2-add-tricount-to-your-assistant)
+Codex CLI, Claude Code), see the [quick start guide](https://github.com/Javo2804/tricount-mcp/blob/main/QUICKSTART.md#step-2-add-tricount-to-your-assistant)
 and replace the command and arguments. Restart the client after changing its config.
 
 ### ChatGPT and web clients
@@ -240,4 +242,4 @@ Built on the research of:
 
 ## License
 
-[MIT](LICENSE)
+[MIT](https://github.com/Javo2804/tricount-mcp/blob/main/LICENSE)

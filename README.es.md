@@ -1,5 +1,7 @@
 # tricount-mcp
 
+[![CI](https://github.com/Javo2804/tricount-mcp/actions/workflows/ci.yml/badge.svg)](https://github.com/Javo2804/tricount-mcp/actions/workflows/ci.yml) [![PyPI](https://img.shields.io/pypi/v/tricount-mcp)](https://pypi.org/project/tricount-mcp/) [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](https://github.com/Javo2804/tricount-mcp/blob/main/LICENSE)
+
 [English](README.md) · **Español**
 
 Servidor [MCP](https://modelcontextprotocol.io) para consultar y editar

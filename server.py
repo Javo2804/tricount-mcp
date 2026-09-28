@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import functools
+import importlib.metadata
 import json
 import os
 import sys
@@ -45,7 +46,12 @@ Notas: los montos van en la moneda del tricount (CLP sin decimales). En los bala
 significa que al miembro le deben y negativo que debe.
 """
 
-server = MCPServer("tricount", instructions=INSTRUCTIONS)
+try:
+    VERSION = importlib.metadata.version("tricount-mcp")
+except importlib.metadata.PackageNotFoundError:  # ejecutado desde el código fuente sin instalar
+    VERSION = "dev"
+
+server = MCPServer("tricount", version=VERSION, instructions=INSTRUCTIONS)
 _register = server.tool
 
 
