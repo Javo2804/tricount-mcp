@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [0.1.1] - 2026-09-28
+
+Documentation-only release, so the PyPI page shows the current install instructions.
+
+### Changed
+
+- Install instructions use `uvx tricount-mcp` from PyPI instead of installing from the GitHub
+  repository (README, README.es and both quick start guides).
+
+
 ## [0.1.0] - 2026-09-28
 
 First public release.
@@ -22,4 +32,5 @@ First public release.
 - Audit log of confirmed writes as JSON on stderr (Cloud Logging on Cloud Run).
 - Install with `uvx`, quick start guides in English and Spanish.
 
+[0.1.1]: https://github.com/Javo2804/tricount-mcp/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Javo2804/tricount-mcp/releases/tag/v0.1.0
