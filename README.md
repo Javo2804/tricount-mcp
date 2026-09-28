@@ -62,11 +62,11 @@ up exactly to the total.
 ### Quick install with uv (recommended)
 
 With [uv](https://docs.astral.sh/uv/) installed you don't need to clone anything or install Python:
-the client downloads and runs the server straight from GitHub. Every MCP client needs the same
+the client downloads and runs the server from [PyPI](https://pypi.org/project/tricount-mcp/). Every MCP client needs the same
 command:
 
 ```bash
-uvx --from git+https://github.com/Javo2804/tricount-mcp tricount-mcp
+uvx tricount-mcp
 ```
 
 Most clients (Claude Desktop, Cursor, Windsurf, Gemini CLI, LM Studio, Cline…) take it in this
@@ -77,7 +77,7 @@ format:
   "mcpServers": {
     "tricount": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/Javo2804/tricount-mcp", "tricount-mcp"]
+      "args": ["tricount-mcp"]
     }
   }
 }

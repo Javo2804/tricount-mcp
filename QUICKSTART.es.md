@@ -72,7 +72,7 @@ Todas las apps piden los mismos dos datos, aunque cada una los guarda en un luga
 | Dato | Valor |
 |---|---|
 | Comando (`command`) | `uvx` |
-| Argumentos (`args`) | `--from` · `git+https://github.com/Javo2804/tricount-mcp` · `tricount-mcp` |
+| Argumentos (`args`) | `tricount-mcp` |
 
 Busca tu app a continuación. Las ubicaciones pueden cambiar entre versiones; si no calzan, busca
 "MCP" en la documentación de tu app.
@@ -86,7 +86,7 @@ Claude Desktop, Cursor, Windsurf, Gemini CLI, LM Studio, Cline y muchas otras us
   "mcpServers": {
     "tricount": {
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/Javo2804/tricount-mcp", "tricount-mcp"]
+      "args": ["tricount-mcp"]
     }
   }
 }
@@ -125,7 +125,7 @@ P), elige **MCP: Open User Configuration** y agrega:
     "tricount": {
       "type": "stdio",
       "command": "uvx",
-      "args": ["--from", "git+https://github.com/Javo2804/tricount-mcp", "tricount-mcp"]
+      "args": ["tricount-mcp"]
     }
   }
 }
@@ -138,7 +138,7 @@ Agrega esto al final de `~/.codex/config.toml`:
 ```toml
 [mcp_servers.tricount]
 command = "uvx"
-args = ["--from", "git+https://github.com/Javo2804/tricount-mcp", "tricount-mcp"]
+args = ["tricount-mcp"]
 ```
 
 ### Claude Code
@@ -146,7 +146,7 @@ args = ["--from", "git+https://github.com/Javo2804/tricount-mcp", "tricount-mcp"
 Ejecuta esto en una terminal:
 
 ```bash
-claude mcp add tricount --scope user -- uvx --from git+https://github.com/Javo2804/tricount-mcp tricount-mcp
+claude mcp add tricount --scope user -- uvx tricount-mcp
 ```
 
 ### Otras apps
