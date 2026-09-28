@@ -1,0 +1,25 @@
+[project]
+name = "tricount-mcp"
+version = "0.1.0"
+description = "MCP server to read and edit Tricount from AI assistants (unofficial)"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp==2.2.0",
+    "httpx==0.28.1",
+    "cryptography==50.0.1",
+]
+
+[project.urls]
+Repository = "https://github.com/Javo2804/tricount-mcp"
+
+[project.scripts]
+tricount-mcp = "server:main"
+
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+py-modules = ["server", "tricount_client"]

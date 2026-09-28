@@ -447,9 +447,13 @@ def delete_entry(acting_as: str, entry_id: int, tricount: str | None = None, con
     return {"borrado": True, "solicitado_por": me, **preview}
 
 
-if __name__ == "__main__":
+def main() -> None:
     port = os.environ.get("PORT")
     if port:  # Cloud Run (o cualquier despliegue HTTP): streamable HTTP sin estado
         server.run("streamable-http", host="0.0.0.0", port=int(port), stateless_http=True, json_response=True)
     else:  # uso local: stdio
         server.run()
+
+
+if __name__ == "__main__":
+    main()

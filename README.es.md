@@ -3,8 +3,9 @@
 [English](README.md) · **Español**
 
 Servidor [MCP](https://modelcontextprotocol.io) para consultar y editar
-[Tricount](https://tricount.com) desde un asistente de IA: Claude, ChatGPT o cualquier cliente
-compatible con MCP.
+[Tricount](https://tricount.com) desde cualquier asistente de IA compatible con MCP: Claude, Cursor,
+VS Code (GitHub Copilot), Windsurf, Gemini CLI, Codex CLI, LM Studio, ChatGPT (como conector
+remoto) y otros.
 
 Puedes pedirle cosas como:
 
@@ -12,6 +13,9 @@ Puedes pedirle cosas como:
 - "¿Qué gastos incluyen a Beto?"
 - "Agrega Pizza, $24.000, pagué yo, entre todos menos Caro"
 - "Registra que Ana me transfirió $5.000"
+
+> **¿No programas?** Sigue la [guía rápida](QUICKSTART.es.md): instalación paso a paso en tu
+> asistente de IA, sin saber programar.
 
 > **Proyecto no oficial.** No está afiliado a Tricount ni a bunq. Usa una API privada que se
 > descubrió analizando la app móvil, y puede dejar de funcionar sin aviso. Lee los
@@ -48,6 +52,35 @@ que las partes siempre suman exactamente el total.
 
 ## Instalación
 
+### Instalación rápida con uv (recomendada)
+
+Con [uv](https://docs.astral.sh/uv/) instalado no necesitas clonar nada ni instalar Python:
+el cliente descarga y ejecuta el servidor directo desde GitHub. Todos los clientes MCP usan el
+mismo comando:
+
+```bash
+uvx --from git+https://github.com/Javo2804/tricount-mcp tricount-mcp
+```
+
+La mayoría (Claude Desktop, Cursor, Windsurf, Gemini CLI, LM Studio, Cline…) lo reciben en este
+formato:
+
+```json
+{
+  "mcpServers": {
+    "tricount": {
+      "command": "uvx",
+      "args": ["--from", "git+https://github.com/Javo2804/tricount-mcp", "tricount-mcp"]
+    }
+  }
+}
+```
+
+La [guía rápida](QUICKSTART.es.md#paso-2-agregar-tricount-a-tu-asistente) indica dónde guarda la
+configuración cada app, e incluye los formatos de VS Code, Codex CLI y Claude Code.
+
+### Instalación manual (para modificar el código)
+
 Necesitas **Python 3.10 o superior** y **git**.
 
 ```bash
@@ -78,18 +111,16 @@ Comprueba que funciona con el tricount de ejemplo que publicó Tricount (solo le
 
 (En Windows, usa `.venv\Scripts\python` en lugar de `.venv/bin/python`.)
 
-## Conectarlo a tu asistente
+## Conectarlo a tu asistente (instalación manual)
 
-En todos los casos necesitas dos **rutas absolutas**:
+Cualquier cliente que acepte servidores MCP locales (stdio) sirve. En vez de `uvx`, usa dos
+**rutas absolutas**:
 
-- **Python del entorno virtual:** `.../tricount-mcp/.venv/bin/python`, o en Windows
+- **Comando:** el Python del entorno virtual, `.../tricount-mcp/.venv/bin/python`, o en Windows
   `...\tricount-mcp\.venv\Scripts\python.exe`.
-- **Servidor:** `.../tricount-mcp/server.py`.
+- **Argumento:** `.../tricount-mcp/server.py`.
 
-### Claude Desktop
-
-Abre Configuración → Desarrollador → Editar configuración. Esto abre `claude_desktop_config.json`.
-Agrega el servidor:
+En el formato común `mcpServers`:
 
 ```json
 {
@@ -103,20 +134,9 @@ Agrega el servidor:
 ```
 
 En Windows, escribe las rutas con doble barra invertida, por ejemplo:
-`"C:\\Users\\tu-usuario\\tricount-mcp\\.venv\\Scripts\\python.exe"`.
-
-Reinicia Claude Desktop y el conector `tricount` aparecerá entre tus herramientas.
-
-### Claude Code
-
-```bash
-claude mcp add tricount --scope user -- /ruta/a/tricount-mcp/.venv/bin/python /ruta/a/tricount-mcp/server.py
-```
-
-### Otros clientes (Cursor, VS Code, Windsurf, etc.)
-
-Cualquier cliente que acepte servidores MCP locales (stdio) sirve. Configúralo con el mismo
-`command` (Python del entorno virtual) y `args` (ruta a `server.py`) de arriba.
+`"C:\\Users\\tu-usuario\\tricount-mcp\\.venv\\Scripts\\python.exe"`. Para otros formatos (VS
+Code, Codex CLI, Claude Code), mira la [guía rápida](QUICKSTART.es.md#paso-2-agregar-tricount-a-tu-asistente)
+y reemplaza el comando y los argumentos. Reinicia el cliente después de cambiar su configuración.
 
 ### ChatGPT y clientes web
 
@@ -131,8 +151,8 @@ internet con HTTP. Ver [Desplegar tu propia instancia](#desplegar-tu-propia-inst
 | `TRICOUNT_USER_AGENT` | User-Agent enviado a la API (ver [avisos](#avisos)) |
 | `PORT` | Si está definida, el servidor usa HTTP en `/mcp` en ese puerto en vez de stdio |
 
-En Claude Desktop, las variables se agregan con `"env": {"TRICOUNT_DEFAULT": "https://tricount.com/tXXXX"}`
-dentro de la entrada del servidor.
+En el formato `mcpServers`, las variables se agregan con
+`"env": {"TRICOUNT_DEFAULT": "https://tricount.com/tXXXX"}` dentro de la entrada del servidor.
 
 ## Desplegar tu propia instancia
 
