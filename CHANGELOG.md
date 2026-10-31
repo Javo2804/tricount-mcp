@@ -4,6 +4,15 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- Write tool `create_income`: records an income (money received, e.g. a benefit), split in equal
+  parts among members. Amounts are stored as positive values, as the official app does for
+  incomes. Same preview / `confirm=true` flow as the other write tools.
+
+
 ## [0.1.1] - 2026-09-28
 
 Documentation-only release, so the PyPI page shows the current install instructions.
