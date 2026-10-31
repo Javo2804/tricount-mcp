@@ -32,6 +32,7 @@ Puedes pedirle cosas como:
 | `list_expenses` | Movimientos con filtros: quién pagó, a quién incluye, texto y fechas |
 | `get_member_detail` | Cuánto pagó una persona, cuánto le corresponde y su gasto por categoría |
 | `create_expense` | Crea un gasto: partes iguales, montos exactos o proporciones |
+| `create_income` | Crea un ingreso (dinero recibido), repartido entre miembros |
 | `create_reimbursement` | Registra un reembolso entre dos miembros |
 | `delete_entry` | Borra un movimiento |
 

@@ -36,7 +36,7 @@ Servidor para consultar y editar tricounts (gastos compartidos). Sigue este fluj
    espera la respuesta. Hay nombres parecidos y equivocarse carga gastos a otra persona.
 3. Identidad: usa ese miembro como acting_as en toda escritura. "Yo", "me", "conmigo" = acting_as.
    Si el usuario cambia de tricount, repite los pasos 2 y 3.
-4. Escribir (create_expense, create_reimbursement, delete_entry): llama primero SIN confirm; muestra
+4. Escribir (create_expense, create_income, create_reimbursement, delete_entry): llama primero SIN confirm; muestra
    la vista previa (monto, quién pagó, reparto, fecha) y solo si el usuario confirma explícitamente
    vuelve a llamar con confirm=true. Cada confirmación vale para un único movimiento.
 5. Ambigüedad: si un nombre no calza o coincide con varios miembros, pregunta; no adivines.
@@ -367,6 +367,68 @@ def create_expense(
         "categoria": category or "UNCATEGORIZED",
     }
     return _save_or_preview(t, payload, preview, confirm, me, "create_expense")
+
+
+@_tool()
+@_with_acting_as_doc
+def create_income(
+    acting_as: str,
+    description: str,
+    amount: float,
+    received_by: str,
+    tricount: str | None = None,
+    split_among: list[str] | None = None,
+    category: str | None = None,
+    income_date: date | None = None,
+    confirm: bool = False,
+) -> dict:
+    """Crea un ingreso (dinero recibido, p. ej. una ayuda) en un tricount. Sin confirm=true
+    solo devuelve una vista previa.
+
+    Args:
+        {acting_as}
+        description: origen del ingreso.
+        amount: monto total recibido (positivo), en la moneda del tricount.
+        received_by: quién recibió el dinero ("yo" = acting_as).
+        tricount: link o key del tricount.
+        split_among: miembros a quienes corresponde el ingreso, en partes iguales
+            (por defecto, todos los miembros).
+        category: igual que en create_expense.
+        income_date: fecha del ingreso (YYYY-MM-DD); por defecto hoy.
+        confirm: true para guardar de verdad.
+    """
+    t = client.get_tricount(_resolve(tricount), fresh=confirm)
+    me = _match(acting_as, t.members)
+    cur = t.currency
+    total = Decimal(str(amount))
+    if total <= 0:
+        raise ValueError("El monto debe ser positivo.")
+    receiver = _match(received_by, t.members)
+    names = [_match(n, t.members) for n in split_among] if split_among else list(t.members)
+    names = list(dict.fromkeys(names))
+    shares = dict(zip(names, split_amount(total, [Decimal(1)] * len(names), cur)))
+    # Los gastos se guardan con montos negativos; los ingresos, con montos positivos
+    # (es lo que devuelve la API para los ingresos creados con la app oficial).
+    payload = {
+        "description": description,
+        "amount": {"value": fmt(total, cur), "currency": cur},
+        "membership_uuid_owner": t.member_uuids[receiver],
+        "allocations": [_allocation(t.member_uuids[n], v, cur) for n, v in shares.items()],
+        "type_transaction": "INCOME",
+        "date": _entry_date(income_date),
+        **_category_fields(category),
+    }
+    preview = {
+        "tricount": t.title,
+        "descripcion": description,
+        "monto": fmt(total, cur),
+        "moneda": cur,
+        "recibido_por": receiver,
+        "reparto": {n: fmt(v, cur) for n, v in shares.items()},
+        "fecha": payload["date"][:10],
+        "categoria": category or "UNCATEGORIZED",
+    }
+    return _save_or_preview(t, payload, preview, confirm, me, "create_income")
 
 
 @_tool()
