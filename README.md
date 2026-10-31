@@ -34,6 +34,7 @@ Ask things like:
 | `list_expenses`        | Transactions, filtered by who paid, who is involved, text and dates |
 | `get_member_detail`    | How much a person paid, their share and their spending by category  |
 | `create_expense`       | Creates an expense: equal split, exact amounts or ratios            |
+| `create_income`        | Creates an income (money received), split among members             |
 | `create_reimbursement` | Records a reimbursement between two members                         |
 | `delete_entry`         | Deletes a transaction                                               |
 
