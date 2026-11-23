@@ -24,9 +24,10 @@ BASE_URL = "https://api.tricount.bunq.com"
 CLIENT_REQUEST_ID = "049bfcdf-6ae4-4cee-af7b-45da31ea85d0"
 # La API decide si la petición viene de la app de Tricount o de la de bunq según el User-Agent;
 # con uno desconocido las escrituras fallan ("Group Expenses is no longer available in the bunq
-# app"). Usamos el mismo que elrandar/tricount-api y mlaily/TricountApi. Se puede sobrescribir
-# con la variable TRICOUNT_USER_AGENT.
-USER_AGENT = os.environ.get("TRICOUNT_USER_AGENT", "com.bunq.tricount.android:RELEASE:7.0.7:3174:ANDROID:13:C")
+# app"). Además, la API rechaza versiones antiguas de la app con 422 "Please update your app"
+# (desde nov 2026 la 7.0.7 ya no sirve; 8.20.0 funciona). Se puede sobrescribir con la variable
+# TRICOUNT_USER_AGENT.
+USER_AGENT = os.environ.get("TRICOUNT_USER_AGENT", "com.bunq.tricount.android:RELEASE:8.20.0:4300:ANDROID:14:C")
 SESSION_FILE = Path.home() / ".tricount-mcp" / "session.json"
 CACHE_TTL_SECONDS = 60
 
