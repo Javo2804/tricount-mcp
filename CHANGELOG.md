@@ -11,6 +11,16 @@ All notable changes to this project are documented here. The format is based on
 - Write tool `create_income`: records an income (money received, e.g. a benefit), split in equal
   parts among members. Amounts are stored as positive values, as the official app does for
   incomes. Same preview / `confirm=true` flow as the other write tools.
+- `get_tricount_summary` reports `cantidad_ingresos` and `ingreso_total`; `list_expenses` reports
+  `total_ingresos_filtrados`; `get_member_detail` reports `ingresos_recibidos` and
+  `ingresos_que_le_corresponden`.
+- `test_write.py` covers incomes (preview, balances, totals and listing).
+
+### Fixed
+
+- Incomes were counted as expenses: they subtracted from `gasto_total`, `total_gastos_filtrados`,
+  a member's `total_pagado` and their share, and were counted in `cantidad_gastos`. Totals now
+  only include expenses, and incomes are shown with a positive amount in listings.
 
 
 ## [0.1.2] - 2026-11-23

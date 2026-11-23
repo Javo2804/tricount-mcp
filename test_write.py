@@ -7,6 +7,7 @@ escritura vía MCP/stdio, verifica balances y al final borra el tricount de prue
 import asyncio
 import json
 import sys
+from decimal import Decimal
 from pathlib import Path
 
 from mcp.client.session import ClientSession
@@ -65,6 +66,24 @@ async def run(key: str) -> None:
         ex = await call(s, "list_expenses", tricount=key)
         vino = next(m for m in ex["movimientos"] if m["descripcion"] == "Vino")
         assert vino["reparto"] == {"Ana": "6000", "Caro": "3000"} and vino["categoria"] == "Carrete 🍷", vino
+
+        # Ingreso: Ana recibe 9000 para los tres (vista previa y luego de verdad).
+        pi = await call(s, "create_income", tricount=key, acting_as="Ana", description="Ayuda", amount=9000, received_by="ana")
+        assert pi["guardado"] is False and pi["reparto"] == {"Ana": "3000", "Beto": "3000", "Caro": "3000"}, pi
+        i1 = await call(s, "create_income", tricount=key, acting_as="Ana", description="Ayuda", amount=9000,
+                        received_by="Ana", confirm=True)
+        print("guardado:", i1)
+        summ = await call(s, "get_tricount_summary", tricount=key)
+        # Ana tiene la plata de los tres: debe 6000 más; Beto y Caro quedan 3000 a favor cada uno.
+        assert summ["balances"] == {"Ana": "-7834.00", "Beto": "3667.00", "Caro": "4167.00"}, summ["balances"]
+        # El ingreso no cuenta como gasto ni resta del gasto total.
+        assert summ["cantidad_gastos"] == 3 and summ["cantidad_ingresos"] == 1, summ
+        assert Decimal(summ["gasto_total"]) == 25000 and Decimal(summ["ingreso_total"]) == 9000, summ
+        ana = await call(s, "get_member_detail", tricount=key, member="Ana")
+        assert Decimal(ana["total_pagado"]) == 10000 and Decimal(ana["ingresos_recibidos"]) == 9000, ana
+        assert Decimal(ana["ingresos_que_le_corresponden"]) == 3000, ana
+        ayuda = next(m for m in (await call(s, "list_expenses", tricount=key))["movimientos"] if m["descripcion"] == "Ayuda")
+        assert ayuda["tipo"] == "ingreso" and ayuda["monto"] == "9000" and ayuda["reparto"]["Beto"] == "3000", ayuda
 
         # acting_as debe ser un miembro real del tricount.
         r = await s.call_tool("create_expense", {"tricount": key, "acting_as": "Zoe", "description": "x",
