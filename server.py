@@ -36,7 +36,7 @@ Servidor para consultar y editar tricounts (gastos compartidos). Sigue este fluj
    espera la respuesta. Hay nombres parecidos y equivocarse carga gastos a otra persona.
 3. Identidad: usa ese miembro como acting_as en toda escritura. "Yo", "me", "conmigo" = acting_as.
    Si el usuario cambia de tricount, repite los pasos 2 y 3.
-4. Escribir (create_expense, create_reimbursement, delete_entry): llama primero SIN confirm; muestra
+4. Escribir (create_expense, create_income, create_reimbursement, delete_entry): llama primero SIN confirm; muestra
    la vista previa (monto, quién pagó, reparto, fecha) y solo si el usuario confirma explícitamente
    vuelve a llamar con confirm=true. Cada confirmación vale para un único movimiento.
 5. Ambigüedad: si un nombre no calza o coincide con varios miembros, pregunta; no adivines.
@@ -104,6 +104,9 @@ def _match(name: str, members: list[str]) -> str:
 
 
 def _entry_dict(e: Entry) -> dict:
+    # Internamente un ingreso queda con signo negativo (es lo contrario de un gasto);
+    # al mostrarlo se presenta en positivo, como en la app.
+    sign = -1 if e.type == "INCOME" else 1
     return {
         "id": e.id,
         "fecha": e.date.date().isoformat(),
@@ -111,9 +114,9 @@ def _entry_dict(e: Entry) -> dict:
         "tipo": TYPE_LABELS.get(e.type, e.type),
         "categoria": e.category,
         "pagado_por": e.paid_by,
-        "monto": str(e.amount),
+        "monto": str(sign * e.amount),
         "moneda": e.currency,
-        "reparto": {a.member: str(a.amount) for a in e.allocations},
+        "reparto": {a.member: str(sign * a.amount) for a in e.allocations},
     }
 
 
@@ -147,16 +150,20 @@ def get_tricount_summary(tricount: str | None = None) -> dict:
         tricount: link (https://tricount.com/tXXXX) o key del tricount.
     """
     t = client.get_tricount(_resolve(tricount))
-    expenses = [e for e in t.entries if e.type != "BALANCE"]
+    expenses = [e for e in t.entries if e.type == "NORMAL"]
+    incomes = [e for e in t.entries if e.type == "INCOME"]
     total = sum((e.amount_registry for e in expenses), Decimal(0))
+    total_in = -sum((e.amount_registry for e in incomes), Decimal(0))
     return {
         "titulo": t.title,
         "descripcion": t.description,
         "moneda": t.currency,
         "miembros": t.members,
         "cantidad_gastos": len(expenses),
-        "cantidad_reembolsos": len(t.entries) - len(expenses),
+        "cantidad_ingresos": len(incomes),
+        "cantidad_reembolsos": sum(1 for e in t.entries if e.type == "BALANCE"),
         "gasto_total": str(total),
+        "ingreso_total": str(total_in),
         "primer_movimiento": t.entries[0].date.date().isoformat() if t.entries else None,
         "ultimo_movimiento": t.entries[-1].date.date().isoformat() if t.entries else None,
         "balances": {m: str(v) for m, v in t.balances().items()},
@@ -204,20 +211,22 @@ def list_expenses(
         entries = [e for e in entries if e.date.date() <= date_to]
     if not include_reimbursements:
         entries = [e for e in entries if e.type != "BALANCE"]
-    total = sum((e.amount_registry for e in entries if e.type != "BALANCE"), Decimal(0))
+    total = sum((e.amount_registry for e in entries if e.type == "NORMAL"), Decimal(0))
+    total_in = -sum((e.amount_registry for e in entries if e.type == "INCOME"), Decimal(0))
     return {
         "titulo": t.title,
         "moneda": t.currency,
         "coincidencias": len(entries),
         "total_gastos_filtrados": str(total),
+        "total_ingresos_filtrados": str(total_in),
         "movimientos": [_entry_dict(e) for e in entries[:limit]],
     }
 
 
 @_tool()
 def get_member_detail(member: str, tricount: str | None = None) -> dict:
-    """Detalle de un miembro: cuánto pagó, cuánto le corresponde, su balance,
-    a quién debe o quién le debe, y sus gastos por categoría.
+    """Detalle de un miembro: cuánto pagó, cuánto le corresponde, cuánto recibió en ingresos,
+    su balance, a quién debe o quién le debe, y sus gastos por categoría.
 
     Args:
         member: nombre del miembro (acepta coincidencia parcial).
@@ -225,17 +234,24 @@ def get_member_detail(member: str, tricount: str | None = None) -> dict:
     """
     t = client.get_tricount(_resolve(tricount))
     who = _match(member, t.members)
-    expenses = [e for e in t.entries if e.type != "BALANCE"]
+    expenses = [e for e in t.entries if e.type == "NORMAL"]
+    incomes = [e for e in t.entries if e.type == "INCOME"]
     paid = sum((e.amount_registry for e in expenses if e.paid_by == who), Decimal(0))
-    share = Decimal(0)
-    by_category: dict[str, Decimal] = {}
-    for e in expenses:
-        ratio = e.amount_registry / e.amount if e.amount else Decimal(1)
-        for a in e.allocations:
-            if a.member == who:
-                part = a.amount * ratio
-                share += part
-                by_category[e.category] = by_category.get(e.category, Decimal(0)) + part
+    received = -sum((e.amount_registry for e in incomes if e.paid_by == who), Decimal(0))
+
+    def my_part(entries: list[Entry]) -> tuple[Decimal, dict[str, Decimal]]:
+        total, by_cat = Decimal(0), {}
+        for e in entries:
+            ratio = e.amount_registry / e.amount if e.amount else Decimal(1)
+            for a in e.allocations:
+                if a.member == who:
+                    part = a.amount * ratio
+                    total += part
+                    by_cat[e.category] = by_cat.get(e.category, Decimal(0)) + part
+        return total, by_cat
+
+    share, by_category = my_part(expenses)
+    income_share = -my_part(incomes)[0]
     reimb_sent = sum((e.amount_registry for e in t.entries if e.type == "BALANCE" and e.paid_by == who), Decimal(0))
     q = Decimal("0.01")
     return {
@@ -243,6 +259,8 @@ def get_member_detail(member: str, tricount: str | None = None) -> dict:
         "moneda": t.currency,
         "total_pagado": str(paid.quantize(q)),
         "total_que_le_corresponde": str(share.quantize(q)),
+        "ingresos_recibidos": str(received.quantize(q)),
+        "ingresos_que_le_corresponden": str(income_share.quantize(q)),
         "reembolsos_enviados": str(reimb_sent.quantize(q)),
         "balance": str(t.balances()[who]),
         "transferencias_pendientes": [s for s in t.settlement() if who in (s["from"], s["to"])],
@@ -367,6 +385,68 @@ def create_expense(
         "categoria": category or "UNCATEGORIZED",
     }
     return _save_or_preview(t, payload, preview, confirm, me, "create_expense")
+
+
+@_tool()
+@_with_acting_as_doc
+def create_income(
+    acting_as: str,
+    description: str,
+    amount: float,
+    received_by: str,
+    tricount: str | None = None,
+    split_among: list[str] | None = None,
+    category: str | None = None,
+    income_date: date | None = None,
+    confirm: bool = False,
+) -> dict:
+    """Crea un ingreso (dinero recibido, p. ej. una ayuda) en un tricount. Sin confirm=true
+    solo devuelve una vista previa.
+
+    Args:
+        {acting_as}
+        description: origen del ingreso.
+        amount: monto total recibido (positivo), en la moneda del tricount.
+        received_by: quién recibió el dinero ("yo" = acting_as).
+        tricount: link o key del tricount.
+        split_among: miembros a quienes corresponde el ingreso, en partes iguales
+            (por defecto, todos los miembros).
+        category: igual que en create_expense.
+        income_date: fecha del ingreso (YYYY-MM-DD); por defecto hoy.
+        confirm: true para guardar de verdad.
+    """
+    t = client.get_tricount(_resolve(tricount), fresh=confirm)
+    me = _match(acting_as, t.members)
+    cur = t.currency
+    total = Decimal(str(amount))
+    if total <= 0:
+        raise ValueError("El monto debe ser positivo.")
+    receiver = _match(received_by, t.members)
+    names = [_match(n, t.members) for n in split_among] if split_among else list(t.members)
+    names = list(dict.fromkeys(names))
+    shares = dict(zip(names, split_amount(total, [Decimal(1)] * len(names), cur)))
+    # Los gastos se guardan con montos negativos; los ingresos, con montos positivos
+    # (es lo que devuelve la API para los ingresos creados con la app oficial).
+    payload = {
+        "description": description,
+        "amount": {"value": fmt(total, cur), "currency": cur},
+        "membership_uuid_owner": t.member_uuids[receiver],
+        "allocations": [_allocation(t.member_uuids[n], v, cur) for n, v in shares.items()],
+        "type_transaction": "INCOME",
+        "date": _entry_date(income_date),
+        **_category_fields(category),
+    }
+    preview = {
+        "tricount": t.title,
+        "descripcion": description,
+        "monto": fmt(total, cur),
+        "moneda": cur,
+        "recibido_por": receiver,
+        "reparto": {n: fmt(v, cur) for n, v in shares.items()},
+        "fecha": payload["date"][:10],
+        "categoria": category or "UNCATEGORIZED",
+    }
+    return _save_or_preview(t, payload, preview, confirm, me, "create_income")
 
 
 @_tool()
